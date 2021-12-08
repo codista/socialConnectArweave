@@ -2,8 +2,8 @@ import Arweave from 'arweave';
 import Wallets from 'arweave/node/wallets';
 import { and, or, equals } from 'arql-ops';
 import dotenv from 'dotenv';
-import {followReqData,AddressType,followersReqdata,unfollowReqData,ArweaveTagNames,ConnType} from "./dataTypes"
-import {expandTransactions,getFollowers} from "./arweaveHelpers"
+import {followingsReqData,followReqData,AddressType,followersReqdata,unfollowReqData,ArweaveTagNames,ConnType} from "./dataTypes"
+import {getFollowers,getFollowings} from "./arweaveHelpers"
 dotenv.config();
 
 async function initArweave() {
@@ -103,6 +103,13 @@ export async function followers(data: followersReqdata): Promise<object | boolea
     return followers;
 } 
 
-export async function followings(data: object): Promise<object | boolean> {
-    return true;
+export async function followings(data: followingsReqData): Promise<object | boolean> {
+    let ar =  await initArweave();
+    if (typeof ar == "boolean" && ar==false) {return false;}  
+    const {wallet, address,arweave} = ar;
+
+    
+    let followings= await getFollowings(data.target, data.namespace,arweave);
+    console.log("followings is "+JSON.stringify(followings));
+    return followings;
 } 

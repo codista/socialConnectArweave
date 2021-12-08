@@ -1,6 +1,6 @@
 import express from 'express';
 import * as arweaveImpl from './../arweave/scArweaveImpl';
-import type {followReqData,followersReqdata,AddressType,unfollowReqData} from "./../arweave/dataTypes"
+import type {followReqData,followersReqdata,followingsReqData,unfollowReqData} from "./../arweave/dataTypes"
 import  { body,validationResult } from 'express-validator';
 
 
@@ -137,10 +137,34 @@ router.post('/followers',
   }
 )
 
-router.post('/followings', (req, res) => {
-
-  let ret = arweaveImpl.followings(req.body.data);
-  res.json(typeof ret =="boolean"?{status: 'Failed'}:{...ret,status:'OK'});
+/**
+* @api {post} /api/v1/sc/followings 
+* @apiName followings
+*
+* @apiParam  {String} [target] target address (eth or arweave)
+* @apiParam  {String} [namespace] app name
+*
+* @apiSuccess (200) {Object} 
+*/
+router.post('/followings',
+  body('target').isString(),
+  body('namespace').isString(),
+  async (req: express.Request, res: express.Response) => {
+    //check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({status: 'Failed', errors: errors.array() });
+    }
+  
+    //cast data and call implementation
+    let reqdata: followingsReqData = req.body as followingsReqData;
+    let followings = arweaveImpl.followings(reqdata);
+    if (typeof followings =="boolean" && followings==false){
+      return res.status(400).json({status: 'Failed' });
+    }
+    else {
+      return res.status(200).json({status: 'OK',users: followings});
+    }
   }
 )
 

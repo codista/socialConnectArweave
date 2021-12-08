@@ -24,6 +24,22 @@ describe('Follow API',
     }) ;
 
 
+    it('should retrieve followings', async () => { 
+        let params = {
+            target: sourceaddr,
+            namespace: "SocialConnect"
+        }
+        const { statusCode, data, headers } = await curly.post('http://localhost:3000/api/v1/sc/followings', {
+            postFields: JSON.stringify(params),
+            httpHeader: [
+                'Content-Type: application/json',
+                'Accept: application/json'
+            ],
+        });
+        console.log(`status code: ${statusCode} data: ${JSON.stringify(data)}`) ;
+        expect(statusCode).to.equal(200); 
+  });
+
     it('should retrieve followers', async () => { 
         let params = {
             target: targetaddr,

@@ -33,6 +33,21 @@ export function getLatest(txs: any) {
     return txs[txs.length-1];
 }
 
+export async function getFollowings(address: string, namespace: string, ar: any) {
+    //get all follow transactions whos source is this address.
+    const myQuery =and(equals('from', process.env.ARWEAVE_ADDRESS),
+            equals(ArweaveTagNames.source,address),
+            equals(ArweaveTagNames.nameSpace,namespace),
+    );
+    const results = await ar.arql(myQuery);
+
+    let expandedTxs = await expandTransactions(results, ar);
+    let TxsMap = mapLatestTxs(expandedTxs,ArweaveTagNames.connTarget);
+    let users = TxsToUserData(TxsMap,ArweaveTagNames.connTarget);
+
+    return users;
+}
+
 export async function getFollowers(address: string, addressType: string,namespace: string, ar: any) {
     //get all follow transactions whos target is this address.
     const myQuery =and(equals('from', process.env.ARWEAVE_ADDRESS),
@@ -44,44 +59,49 @@ export async function getFollowers(address: string, addressType: string,namespac
 
     let expandedTxs = await expandTransactions(results, ar);
     //console.log(`expanded txs is : ${JSON.stringify(expandedTxs)}`);
-    let TxsMap = mapLatestTxs(expandedTxs);
-    console.log(`transactionmap is: ${JSON.stringify(TxsMap)} length is ${Object.keys(TxsMap).length}`);
-
-    let users = TxsToUserData(TxsMap);
+    let TxsMap = mapLatestTxs(expandedTxs,ArweaveTagNames.source);
+    //console.log(`transactionmap is: ${JSON.stringify(TxsMap)} length is ${Object.keys(TxsMap).length}`);
+    let users = TxsToUserData(TxsMap,ArweaveTagNames.source);
 
     return users;
 }
 
-function txToUser(tx: any) {
+function txToUser(tx: any,whichUser: string) {
     let ret: UserData = {address:'',addressType:'Eth',alias:''};
-    ret.address = tx[ArweaveTagNames.source];
-    ret.addressType = "Eth";
-    ret.alias = tx[ArweaveTagNames.alias];
+    if (whichUser==ArweaveTagNames.source) {
+        ret.address = tx[ArweaveTagNames.source];
+        ret.addressType = "Eth";
+        ret.alias = "";
+    }
+    else {
+        ret.address = tx[ArweaveTagNames.connTarget];
+        ret.addressType = tx[ArweaveTagNames.targetType];
+        ret.alias = tx[ArweaveTagNames.alias];
+    }
     return ret;
 }
 
-export function TxsToUserData(TxsMap) {
+export function TxsToUserData(TxsMap, whichUser: string) {
     var users = new Array();
     let keys = Object.keys(TxsMap);
     for (var i=0;i<keys.length;i++) {
         if (TxsMap[keys[i]][ArweaveTagNames.connType] =="Follow") {
-            users.push(txToUser(TxsMap[keys[i]]))     
+            users.push(txToUser(TxsMap[keys[i]],whichUser))     
         }
     }
     return users;
 }
 
-export function mapLatestTxs(txs): Object {
+export function mapLatestTxs(txs, mapBy: string): Object {
     var mp= new Object();
     for (var i=0;i<txs.length;i++) {
-        let currKey = txs[i][ArweaveTagNames.source];
-        
+        let currKey = txs[i][mapBy];
         if ((currKey in mp ==false) || mp[currKey][ArweaveTagNames.createdDate]<txs[i][ArweaveTagNames.createdDate]) {
             mp[currKey] = txs[i];
             //console.log(`just set ${txs[i][ArweaveTagNames.source]}  to ${JSON.stringify(mp[txs[i][ArweaveTagNames.source]])}`)
         }
     }
-    console.log(`transactionmap is: ${JSON.stringify(mp)} `);
+    //console.log(`transactionmap is: ${JSON.stringify(mp)} `);
     return mp;
 }
 

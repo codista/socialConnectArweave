@@ -54,7 +54,8 @@ export type unfollowReqData = {
 
 //followings req
 export type followingsReqData = {
-    target: string
+    target: string,
+    namespace: string
 }
 //followings response
 export type followingsResData = {

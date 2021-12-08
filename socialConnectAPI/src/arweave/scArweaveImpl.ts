@@ -3,7 +3,7 @@ import Wallets from 'arweave/node/wallets';
 import { and, or, equals } from 'arql-ops';
 import dotenv from 'dotenv';
 import {followReqData,AddressType,followersReqdata,unfollowReqData,ArweaveTagNames,ConnType} from "./dataTypes"
-import {expandTransactions} from "./arweaveHelpers"
+import {expandTransactions,getFollowers} from "./arweaveHelpers"
 dotenv.config();
 
 async function initArweave() {
@@ -97,16 +97,10 @@ export async function followers(data: followersReqdata): Promise<object | boolea
     if (typeof ar == "boolean" && ar==false) {return false;}  
     const {wallet, address,arweave} = ar;
 
-    //get all follow transactions whos target is this address.
-    const myQuery =and(equals('from', process.env.ARWEAVE_ADDRESS),
-            equals(ArweaveTagNames.connTarget,data.target),
-            equals(ArweaveTagNames.targetType,data.targetType),
-            equals(ArweaveTagNames.nameSpace,data.namespace),
-            );  
-    const results = await arweave.arql(myQuery);
-    let expanded= await expandTransactions(results,arweave);
-    console.log("expanded is "+JSON.stringify(expanded));
-    return expanded;
+    
+    let followers= await getFollowers(data.target,data.targetType, data.namespace,arweave);
+    console.log("followers is "+JSON.stringify(followers));
+    return followers;
 } 
 
 export async function followings(data: object): Promise<object | boolean> {

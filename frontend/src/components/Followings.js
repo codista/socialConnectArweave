@@ -10,12 +10,25 @@ import { Flex,
     FormErrorMessage} from "@chakra-ui/react"
 import {useState} from "react";  
 import { Formik,Form,Field } from 'formik'; 
+import UserList from "./UserList"
+import {makeAPICall,APP_NAMESPACE} from "./../lib/api"
 
 const Followings = () => {
-    const  onSubmit = (values) => {
+    const  onSubmit = async (values,actions) => {
         //AddAppraisalFunc(values);
-        alert("submitted");
+        let ret=await makeAPICall("followings",{target:values.address,namespace:APP_NAMESPACE});
+        if ('status' in ret && ret.status=="OK" && 'users' in ret) {
+            setFollowings(ret.users);
+        }
+        else {
+            console.error("problem retrieving followings");
+            alert("Oops, something went wrong");
+        }
+        actions.setSubmitting(false);
     }
+
+    const [followings,setFollowings] =useState({});
+
     function validateAddress(value) {
         let error
         if (!value) {
@@ -38,8 +51,8 @@ const Followings = () => {
                 onSubmit={(values, actions) => {
                 setTimeout(() => {
                     //alert(JSON.stringify(values, null, 2))
-                    onSubmit(values)
-                    actions.setSubmitting(false)
+                    onSubmit(values, actions);
+                    
                 }, 1000)
                 }}
             >
@@ -51,12 +64,13 @@ const Followings = () => {
                                 <FormLabel htmlFor="address">Address</FormLabel>
                                 <Input {...field} id="address" placeholder="address" />
                                 <FormErrorMessage>{form.errors.address}</FormErrorMessage>
-                                <FormHelperText>Ethereum of Arweave address for which to retrieve followers.</FormHelperText>
+                                <FormHelperText>Ethereum address for which to retrieve followings.</FormHelperText>
                             </FormControl>
                             )}
                         </Field>
 
                         <Box w={{ lg: "100%" }}
+                            m={5}
                             alignItems="center"
                             justifyContent="center"
                         >        
@@ -73,7 +87,9 @@ const Followings = () => {
                     </Form>
                 )}
             </Formik>
-        </Flex>    
+            <UserList users={followings} /> 
+        </Flex> 
+          
     )
 }
 

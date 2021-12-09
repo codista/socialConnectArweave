@@ -124,6 +124,6 @@ export async function followings(data: followingsReqData): Promise<object | bool
 
     
     let followings= await getFollowings(data.target, data.namespace,arweave);
-    console.log("followings is "+JSON.stringify(followings));
+    //console.log("followings is "+JSON.stringify(followings));
     return followings;
 } 

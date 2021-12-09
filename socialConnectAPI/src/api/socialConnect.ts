@@ -158,12 +158,14 @@ router.post('/followings',
   
     //cast data and call implementation
     let reqdata: followingsReqData = req.body as followingsReqData;
-    let followings = arweaveImpl.followings(reqdata);
+    let followings = await arweaveImpl.followings(reqdata);
     if (typeof followings =="boolean" && followings==false){
       return res.status(400).json({status: 'Failed' });
     }
     else {
-      return res.status(200).json({status: 'OK',users: followings});
+      let returnJson =  {status: 'OK',users: followings};
+      //console.log("followings before return is "+JSON.stringify(returnJson));
+      return res.status(200).json(returnJson);
     }
   }
 )

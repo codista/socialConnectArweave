@@ -1,10 +1,10 @@
+import { Box} from "@chakra-ui/react"
 
-
-const UserList = () => {
+const UserList = ({users}) => {
     return (
-        <div>
-            
-        </div>
+        <Box>
+            {JSON.stringify(users)}
+        </Box>
     )
 }
 

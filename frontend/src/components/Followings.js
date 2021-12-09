@@ -7,7 +7,9 @@ import { Flex,
     Stack,
     Button,
     Text,
-    FormErrorMessage} from "@chakra-ui/react"
+    VStack,
+    FormErrorMessage,
+    useColorModeValue} from "@chakra-ui/react"
 import {useState} from "react";  
 import { Formik,Form,Field } from 'formik'; 
 import UserList from "./UserList"
@@ -26,8 +28,8 @@ const Followings = () => {
         }
         actions.setSubmitting(false);
     }
-
-    const [followings,setFollowings] =useState({});
+    // eslint-disable-next-line
+    const [followings,setFollowings] =useState(Array());
 
     function validateAddress(value) {
         let error
@@ -39,14 +41,24 @@ const Followings = () => {
         return error
     }
     return (
-        <Flex
-            p={5}
-            pb={20}
-            w="full"
-            alignItems="center"
-            justifyContent="center"
+        <VStack
+        p={5}
+        maxW={{ lg: "6xl" }}
+        alignItems="center"
+        justifyContent="center"
         >
-            <Formik
+            <Box
+                bg={useColorModeValue("white", "gray.800")}
+                mx={{ lg: 8 }}
+                display={{ lg: "flex" }}
+                p={5}
+                w="full"
+                shadow={{ lg: "lg" }}
+                rounded={{ lg: "lg" }}
+                alignItems="center"
+                justifyContent="center"
+            >
+            <Formik 
                 initialValues={{ nftContract: "", NFTId: "",NFTMarketplace: "",minVoters: "",minExpertLevel:"",payout:"0.001"}}
                 onSubmit={(values, actions) => {
                 setTimeout(() => {
@@ -60,7 +72,7 @@ const Followings = () => {
                     <Form >
                         <Field name="address" validate={validateAddress}>
                             {({ field, form }) => (
-                            <FormControl isRequired isInvalid={form.errors.address && form.touched.address}>
+                            <FormControl isRequired isInvalid={form.errors.address && form.touched.address} >
                                 <FormLabel htmlFor="address">Address</FormLabel>
                                 <Input {...field} id="address" placeholder="address" />
                                 <FormErrorMessage>{form.errors.address}</FormErrorMessage>
@@ -87,8 +99,22 @@ const Followings = () => {
                     </Form>
                 )}
             </Formik>
-            <UserList users={followings} /> 
-        </Flex> 
+            
+            
+            </Box>
+            <Box
+                bg={useColorModeValue("white", "gray.800")}
+                mx={{ lg: 8 }}
+                display={{ lg: "flex" }}
+                w="full"
+                shadow={{ lg: "lg" }}
+                rounded={{ lg: "lg" }}
+                alignItems="center"
+                justifyContent="center"
+            >
+            <UserList users={followings} title="Followings:" /> 
+            </Box>
+        </VStack> 
           
     )
 }

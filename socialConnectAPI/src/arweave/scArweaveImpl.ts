@@ -3,7 +3,7 @@ import Wallets from 'arweave/node/wallets';
 import { and, or, equals } from 'arql-ops';
 import dotenv from 'dotenv';
 import {followingsReqData,followReqData,AddressType,followersReqdata,unfollowReqData,ArweaveTagNames,ConnType} from "./dataTypes"
-import {getFollowers,getFollowings} from "./arweaveHelpers"
+import {getFollowers,getFollowings,validateSignedMessage} from "./arweaveHelpers"
 dotenv.config();
 
 async function initArweave() {
@@ -29,6 +29,8 @@ async function initArweave() {
   
 
 
+
+
 export async function follow(data: followReqData): Promise<boolean | string> {
     
     let ar =  await initArweave();
@@ -36,7 +38,13 @@ export async function follow(data: followReqData): Promise<boolean | string> {
     const {wallet, address,arweave} = ar;
 
     //validate request signature
-    //TO ADD
+    let ct: ConnType="Follow";
+    let message: string = ct+" "+data.target+" "+data.namespace;
+    let validSig = validateSignedMessage(data.sig,message,data.sourceAddress);
+    if (!validSig) {
+        console.error("invalid signature at follow");
+        return false;
+    }
 
     //create and send transaction
     let transaction: any;
@@ -68,7 +76,13 @@ export async function unfollow(data: unfollowReqData): Promise<boolean|string> {
     const {wallet, address,arweave} = ar;
 
     //validate request signature
-    //TO ADD
+    let ct: ConnType="Unfollow";
+    let message: string = ct+" "+data.target+" "+data.namespace;
+    let validSig = validateSignedMessage(data.sig,message,data.sourceAddress);
+    if (!validSig) {
+        console.error("invalid signature at Unfollow");
+        return false;
+    }
 
     //create and send transaction
     let transaction: any;

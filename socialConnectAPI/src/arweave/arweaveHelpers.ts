@@ -1,5 +1,6 @@
 import {ArweaveTagNames,UserData} from './dataTypes';
 import { and, or, equals } from 'arql-ops';
+import {ethers} from "ethers"
 
 //fetch detailed tx information from a list of transaction ids as json
 export async function expandTransactions(tx_ids: string[], ar: any): Promise<any> {
@@ -90,6 +91,11 @@ export function TxsToUserData(TxsMap, whichUser: string) {
         }
     }
     return users;
+}
+
+export function validateSignedMessage(signedMessage: string, message: string, address: string): boolean {
+    let signerAddr = ethers.utils.verifyMessage(message,signedMessage);
+    return (signerAddr===address);
 }
 
 export function mapLatestTxs(txs, mapBy: string): Object {

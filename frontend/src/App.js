@@ -13,6 +13,9 @@ import {
 import Header from "./components/Header"
 import { ethers } from "ethers";
 import { requestUserConnect } from "./bootstrap/initialize"
+import SocialActions from "./components/SocialActions"
+import Followers from "./components/Followers"
+import Followings from "./components/Followings"
 
 import {useEffect,useCallback} from "react"
 
@@ -89,13 +92,13 @@ function App() {
               </TabList>
               <TabPanels>
                 <TabPanel>
-                  
+                  <SocialActions />
                 </TabPanel>
                 <TabPanel>
-                
+                  <Followers />
                 </TabPanel>
                 <TabPanel>
-                
+                  <Followings />
                 </TabPanel>
               </TabPanels>
             </Tabs>

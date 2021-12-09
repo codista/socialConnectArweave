@@ -1,6 +1,16 @@
 import {API_URL_BASE} from "./conf_private"
+import ethers from "ethers"
 
 export const APP_NAMESPACE = "SocialConnect";
+
+export async function signMessage(provider,message) {
+    let signer = provider.getSigner();
+    if (!signer) {console.error("attempt to sign with no sigher");return false;}
+    let address = await signer.getAddress();
+    let signature = await signer.signMessage(message);
+    return signature;
+}
+
 
 export async function makeAPICall(apiFunction, params) {
     let retJson={};
@@ -26,7 +36,7 @@ export async function makeAPICall(apiFunction, params) {
             console.log("client received api results: "+JSON.stringify(retJson));
         }  
         else {
-            console.error(`fetching api results returned error ${res.status} `);
+            console.error(`fetching api results returned error ${JSON.stringify(res)}`);
         }
     }
     catch(err){

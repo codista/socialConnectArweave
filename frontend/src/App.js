@@ -92,7 +92,7 @@ function App() {
               </TabList>
               <TabPanels>
                 <TabPanel>
-                  <SocialActions />
+                  <SocialActions provider={ethersProvider} />
                 </TabPanel>
                 <TabPanel>
                   <Followers />

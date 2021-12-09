@@ -45,6 +45,9 @@ export async function follow(data: followReqData): Promise<boolean | string> {
         console.error("invalid signature at follow");
         return false;
     }
+    else {
+        console.log("signature validated");
+    }
 
     //create and send transaction
     let transaction: any;

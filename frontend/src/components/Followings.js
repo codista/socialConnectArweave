@@ -22,9 +22,11 @@ const Followings = () => {
         if ('status' in ret && ret.status=="OK" && 'users' in ret) {
             setFollowings(ret.users);
         }
-        else {
+        else if (!('status' in ret) || ret.status!="OK") {
             console.error("problem retrieving followings");
             alert("Oops, something went wrong");
+        } else {
+            console.log("no Folllowings");
         }
         actions.setSubmitting(false);
     }
@@ -59,7 +61,7 @@ const Followings = () => {
                 justifyContent="center"
             >
             <Formik 
-                initialValues={{ nftContract: "", NFTId: "",NFTMarketplace: "",minVoters: "",minExpertLevel:"",payout:"0.001"}}
+                initialValues={{ address: ""}}
                 onSubmit={(values, actions) => {
                 setTimeout(() => {
                     //alert(JSON.stringify(values, null, 2))

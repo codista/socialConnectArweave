@@ -1,12 +1,10 @@
-import { Flex,
+import { 
     Box,
     FormControl,
     FormLabel,
     Input,
     FormHelperText,
-    Stack,
     Button,
-    Text,
     VStack,
     FormErrorMessage,
     useColorModeValue} from "@chakra-ui/react"
@@ -23,9 +21,11 @@ const Followers = () => {
         if ('status' in ret && ret.status=="OK" && 'users' in ret) {
             setFollowers(ret.users);
         }
-        else {
-            console.error("problem retrieving followings");
+        else if (!('status' in ret) || ret.status!="OK") {
+            console.error("problem retrieving followers");
             alert("Oops, something went wrong");
+        } else {
+            console.log("no Folllowings");
         }
         actions.setSubmitting(false);
     }
@@ -60,7 +60,7 @@ const Followers = () => {
                 justifyContent="center"
             >
             <Formik 
-                initialValues={{ nftContract: "", NFTId: "",NFTMarketplace: "",minVoters: "",minExpertLevel:"",payout:"0.001"}}
+                initialValues={{ address: ""}}
                 onSubmit={(values, actions) => {
                 setTimeout(() => {
                     //alert(JSON.stringify(values, null, 2))

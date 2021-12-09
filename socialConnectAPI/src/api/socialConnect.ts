@@ -23,7 +23,7 @@ router.post('/follow',
   body('sourceAddress').isEthereumAddress(),
   body('target').isString(),
   body('namespace').isString(),
-  body('alias').isString(),
+  body('alias').optional().isString(),
   body('targetType').custom((value) => {
     if (value != "Eth" && value !== "Arweave") {
       throw new Error('targetType should be either "Eth" or "Arweave"');
@@ -36,6 +36,7 @@ router.post('/follow',
     //check for validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.error('got errors '+JSON.stringify(errors));
       return res.status(400).json({status: 'Failed', errors: errors.array() });
     }
   
@@ -45,10 +46,11 @@ router.post('/follow',
     let reqdata: followReqData = req.body as followReqData;
     let ret = await arweaveImpl.follow(reqdata);
     if (typeof ret =="boolean" && ret==false){
+      console.error('follow failed')
       return res.status(400).json({status: 'Failed' });
     }
     else {
-      return res.status(200).json({status: 'OK',tx_id:ret});
+      return res.status(200).json({status: 'OK',tx_id: ret});
     }
   }
 )

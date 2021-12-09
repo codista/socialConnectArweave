@@ -1,5 +1,6 @@
 import { 
     Box,
+    Text,
     FormControl,
     FormLabel,
     Input,
@@ -9,7 +10,7 @@ import {
     Select,
     FormErrorMessage,
     useColorModeValue} from "@chakra-ui/react"
-import {useState} from "react";  
+import {useState,useEffect} from "react";  
 import { Formik,Form,Field } from 'formik'; 
 import UserList from "./UserList"
 import {makeAPICall,APP_NAMESPACE,signMessage} from "./../lib/api"
@@ -45,22 +46,40 @@ const UserActions = ({provider}) => {
         actions.setSubmitting(false);
     }
 
-    const  getFollowings = async (values,actions) => {
-
-        let ret=await makeAPICall("followings",{target:values.address,namespace:APP_NAMESPACE,targetType:"Eth"});
-        //console.log("got followers "+JSON.stringify(ret));
+    const  getFollowings = async (provider) => {
+        // eslint-disable-next-line
+        if (!provider) return Array();
+        let signerAddress = await provider.getSigner().getAddress(); 
+        let ret=await makeAPICall("followings",{target:signerAddress,namespace:APP_NAMESPACE,targetType:"Eth"});
+        console.log("got followings is useractions "+JSON.stringify(ret));
         if ('status' in ret && ret.status=="OK" && 'users' in ret) {
-            setFollowings(ret.users);
+            return ret.users;
         }
         else {
             console.error("problem retrieving followings");
             alert("Oops, something went wrong");
+            return Array();
         }
-        actions.setSubmitting(false);
+        
     }
 
     //eslint-disable-next-line
     const [followings,setFollowings] =useState(Array());
+    const [fetchingFollowings,setFetchingFollowings] =useState(false);
+
+    useEffect(() => {
+        const getFoll = async (provider) => {
+            if (provider!==null) {
+                setFetchingFollowings(true);
+                const followings = await getFollowings(provider);
+                setFetchingFollowings(false);
+                if (Array.isArray(followings)){
+                    setFollowings(followings);
+                }
+            }
+        }
+        getFoll(provider);
+    },[provider])
 
     function validateAddress(value) {
         let error
@@ -82,6 +101,7 @@ const UserActions = ({provider}) => {
 
     let ctrlStle = {marginTop:'25px'};
     return (
+        (provider!=null)?
         <VStack
         p={5}
         maxW={{ lg: "6xl" }}
@@ -89,7 +109,7 @@ const UserActions = ({provider}) => {
         justifyContent="center"
         >
             <Box
-                bg={useColorModeValue("white", "gray.800")}
+                bg={'white'}
                 mx={{ lg: 8 }}
                 display={{ lg: "flex" }}
                 p={5}
@@ -169,7 +189,7 @@ const UserActions = ({provider}) => {
             
             </Box>
             <Box
-                bg={useColorModeValue("white", "gray.800")}
+                bg={'white'}
                 mx={{ lg: 8 }}
                 display={{ lg: "flex" }}
                 w="full"
@@ -181,7 +201,7 @@ const UserActions = ({provider}) => {
             <UserList users={followings} title="Your Follwings:" /> 
             </Box>
         </VStack> 
-          
+                            :<Text>Please connect to Metamask to manage your social connections.</Text>
     )
 }
 

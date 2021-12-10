@@ -3,7 +3,7 @@ import Wallets from 'arweave/node/wallets';
 import { and, or, equals } from 'arql-ops';
 import dotenv from 'dotenv';
 import {followingsReqData,followReqData,AddressType,followersReqdata,unfollowReqData,ArweaveTagNames,ConnType} from "./dataTypes"
-import {getFollowers,getFollowings,validateSignedMessage} from "./arweaveHelpers"
+import {getFollowers,getFollowings,validateSignedMessage,expandTransactions,getLatest,submitAndWaitForConfirmation} from "./arweaveHelpers"
 dotenv.config();
 
 async function initArweave() {
@@ -49,6 +49,14 @@ export async function follow(data: followReqData): Promise<boolean | string> {
         console.log("signature validated");
     }
 
+    let alreadyFollowing = await isFollowing(data.sourceAddress, data.target,data.namespace,arweave);
+    if (typeof alreadyFollowing=="string") {
+        console.log('already following, returning existing transaction id '+alreadyFollowing);
+        return alreadyFollowing;         //success with last follow tx id since we don't need to re-follow
+    } else {
+        console.log('not aleady following, needs to submit new transaction. '+alreadyFollowing);
+    }
+
     //create and send transaction
     let transaction: any;
     try {
@@ -62,16 +70,33 @@ export async function follow(data: followReqData): Promise<boolean | string> {
         transaction.addTag(ArweaveTagNames.createdDate, Date.now());
         transaction.addTag(ArweaveTagNames.source, data.sourceAddress);
         await arweave.transactions.sign(transaction, wallet);
-
-        const resp = await arweave.transactions.post(transaction);
-        console.log(`follow tx status is ${resp.status} ${resp.statusText} transaction id is ${transaction.id}`);
+        let ret = await submitAndWaitForConfirmation(transaction,arweave,false);
+        if (!ret) {return false;}
     } catch(err) {
-        console.error("exception in follow: ", err.message);return false;
+        console.error("exception in follow: ", err.message);
+        return false;
     }
-
-
     return transaction.id;
-} 
+}
+
+//return a string with the latest follow transaction id if following, false if not following
+export async function isFollowing(source: string, target: string, namespace: string,ar: any) {
+    const myQuery =and(equals('from', process.env.ARWEAVE_ADDRESS),
+            equals(ArweaveTagNames.source,source),
+            equals(ArweaveTagNames.connTarget,target),
+            equals(ArweaveTagNames.nameSpace,namespace),
+    );
+    const results = await ar.arql(myQuery);
+    if (results.length==0) {
+        //console.log('no existing social action between this source and target based on query '+JSON.stringify(myQuery));
+        return false;
+    }
+    let expandedTxs = await expandTransactions(results, ar);
+    let latest = getLatest(expandedTxs);
+    let ctfollow: ConnType = "Follow";
+    //console.log(`latest activity between source and target was ${latest[ArweaveTagNames.connType]}`);
+    return (latest[ArweaveTagNames.connType]==ctfollow)?latest.id:false;
+}
 
 export async function unfollow(data: unfollowReqData): Promise<boolean|string> {
     let ar =  await initArweave();
@@ -87,6 +112,12 @@ export async function unfollow(data: unfollowReqData): Promise<boolean|string> {
         return false;
     }
 
+    //only unfollow if currently following
+    let isfollowing = await isFollowing(data.sourceAddress, data.target,data.namespace,arweave);
+    if (typeof isfollowing=="boolean" && isfollowing===false) {
+        return "not following";         //success with dummy tx id since we don't need to unfollow if not following
+    }
+
     //create and send transaction
     let transaction: any;
     try {
@@ -100,10 +131,11 @@ export async function unfollow(data: unfollowReqData): Promise<boolean|string> {
         transaction.addTag(ArweaveTagNames.source, data.sourceAddress);
         await arweave.transactions.sign(transaction, wallet);
 
-        const resp = await arweave.transactions.post(transaction);
-        console.log(`follow tx status is ${resp.status} ${resp.statusText} transaction id is ${transaction.id}`);
+        let ret = await submitAndWaitForConfirmation(transaction,arweave,false);
+        if (!ret) {return false;}
     } catch(err) {
-        console.error("exception in follow: ", err.message);return false;
+        console.error("exception in follow: ", err.message);
+        return false;
     }
 
     return transaction.id;

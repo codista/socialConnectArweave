@@ -28,6 +28,34 @@ export async function expandTransactions(tx_ids: string[], ar: any): Promise<any
     return res;
 }
 
+export async function submitAndWaitForConfirmation(tx: any, ar: any,bWait: boolean) {
+
+    let resp = await ar.transactions.post(tx);
+    console.log(`submitted. response is ${JSON.stringify(resp)} `);
+    if (resp.status!=200) {
+        console.error(`submit trasaction failed returned status ${resp.status}`)
+    }
+    if (!bWait) {
+        return true;
+    }
+
+    let startTime: number=Date.now(),currTime: number=Date.now();
+    //wait up to 2 minutes for confirmation then bail.
+    resp = await ar.transactions.getStatus(tx.id);
+    while ('status' in resp && (resp.status==200 || resp.status==202) && resp.confirmed==null && (currTime-startTime)<1000*2720) {
+        resp = await ar.transactions.getStatus(tx.id);
+        console.log(`waiting for confirmation. response is ${JSON.stringify(resp)} time laspe: ${(currTime-startTime)/1000} seconds`);
+        currTime=Date.now();
+    }
+    if (('status' in resp) && resp.status ==200 && ('confirmed' in resp) && resp.confirmed!=null && ('number_of_confirmations' in resp.confirmed) && resp.confirmed.number_of_confirmations>0) {
+        return true;
+    }
+    else {
+        console.error(`failed waiting for confirmed transaction. id: ${tx.id} response: ${JSON.stringify(resp)} time laspe: ${(currTime-startTime)/1000} seconds`);
+        return false;
+    }
+}
+
 //returns the last transaction based on the createdBy tag
 export function getLatest(txs: any) {
     txs.sort((a,b) => (a[ArweaveTagNames.createdDate] > b[ArweaveTagNames.createdDate]) ? 1 : ((a[ArweaveTagNames.createdDate] < b[ArweaveTagNames.createdDate]) ? -1 : 0));
@@ -48,6 +76,8 @@ export async function getFollowings(address: string, namespace: string, ar: any)
 
     return users;
 }
+
+
 
 export async function getFollowers(address: string, addressType: string,namespace: string, ar: any) {
     //get all follow transactions whos target is this address.

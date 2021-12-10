@@ -36,7 +36,7 @@ const UserActions = ({provider}) => {
                                             });
         if ('status' in ret && ret.status=="OK") {
            console.log("Unfollow succeeded");
-           alert("Succesfuly unfollowed "+user.address+"(the UI will be updated soon when the transaction is fully mined)")
+           alert("Succesfuly unfollowed "+user.address+" (the UI will be updated soon when the transaction is fully mined)")
         }
         else {
             console.error("problem following"+JSON.stringify(ret));

@@ -1,6 +1,6 @@
-import { Box,HStack,Text,Table,Tr,Tbody,Td,TableCaption} from "@chakra-ui/react"
+import { Box,Button,Text,Table,Tr,Tbody,Td,TableCaption} from "@chakra-ui/react"
 
-const UserList = ({users,title}) => {
+const UserList = ({users,title,unfollow,unfollowFunc}) => {
     let tdstyle = {textAlign:'left'};
     let lbStyle={fontWeight: 'bold'};
     console.log("rendering users:" + JSON.stringify(users));
@@ -18,6 +18,7 @@ const UserList = ({users,title}) => {
                                     <Td style={tdstyle}><Text>{user.addressType}</Text></Td>
                                     <Td style={tdstyle}><Text style={lbStyle}>Alias:</Text></Td>
                                     <Td style={tdstyle}><Text>{user.alias}</Text></Td>
+                                    {unfollow?<Td><Button colorScheme="blue" variant="outline" onClick={()=>{unfollowFunc(user)}}>Unfollow</Button></Td>:''}
                                 </Tr>
                 
                 )):''}

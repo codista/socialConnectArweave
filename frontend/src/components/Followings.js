@@ -114,7 +114,7 @@ const Followings = () => {
                 alignItems="center"
                 justifyContent="center"
             >
-            <UserList users={followings} title="Followings:" /> 
+            <UserList users={followings} title="Followings:" unfollow={false} /> 
             </Box>
         </VStack> 
           

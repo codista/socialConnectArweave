@@ -17,6 +17,33 @@ import {makeAPICall,APP_NAMESPACE,signMessage} from "./../lib/api"
 
 const UserActions = ({provider}) => {
 
+    async function unfollowf(user)  {
+        if (!provider) {
+            console.error("submitting unfollow while not connected");
+            
+            return;
+        }
+
+        // eslint-disable-next-line
+        let message = "Unfollow"+" "+user.address+" "+APP_NAMESPACE;
+        let signature= await signMessage(provider,message);    
+        let signerAddress = await provider.getSigner().getAddress();   
+        let ret=await makeAPICall("Unfollow",{sourceAddress:signerAddress,
+                                            target:user.address,
+                                            namespace:APP_NAMESPACE,
+                                            targetType:user.addressType,
+                                            sig:signature
+                                            });
+        if ('status' in ret && ret.status=="OK") {
+           console.log("Unfollow succeeded");
+           alert("Succesfuly unfollowed "+user.address+"(the UI will be updated soon when the transaction is fully mined)")
+        }
+        else {
+            console.error("problem following"+JSON.stringify(ret));
+            alert("Oops, something went wrong");
+        }
+    }
+
     const  onSubmitFollow = async (values,actions) => {    
         if (!provider) {
             console.error("submitting while not connected");
@@ -58,7 +85,7 @@ const UserActions = ({provider}) => {
         else {
             console.error("problem retrieving followings");
             alert("Oops, something went wrong");
-            return Array();
+            return [];
         }
         
     }
@@ -198,7 +225,7 @@ const UserActions = ({provider}) => {
                 alignItems="center"
                 justifyContent="center"
             >
-            <UserList users={followings} title="Your Follwings:" /> 
+            <UserList users={followings} title="Your Follwings:" unfollow={true} unfollowFunc={unfollowf} /> 
             </Box>
         </VStack> 
                             :<Text>Please connect to Metamask to manage your social connections.</Text>

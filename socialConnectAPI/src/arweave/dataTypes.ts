@@ -2,10 +2,12 @@
 export type ConnType = "Follow" | "Unfollow";
 export type AddressType = "Eth" | "Arweave";
 export type Response = "OK" | "Failed";
+export type userStatus = "Pending" | "Confirmed";
 export type UserData = {
     address: string,
     addressType: AddressType,
-    alias: string
+    alias: string,
+    status: userStatus
 }
 
 

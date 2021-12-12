@@ -98,7 +98,7 @@ export async function getFollowers(address: string, addressType: string,namespac
 }
 
 function txToUser(tx: any,whichUser: string) {
-    let ret: UserData = {address:'',addressType:'Eth',alias:''};
+    let ret: UserData = {address:'',addressType:'Eth',alias:'',status:'Confirmed'};
     if (whichUser==ArweaveTagNames.source) {
         ret.address = tx[ArweaveTagNames.source];
         ret.addressType = "Eth";
@@ -108,6 +108,7 @@ function txToUser(tx: any,whichUser: string) {
         ret.address = tx[ArweaveTagNames.connTarget];
         ret.addressType = tx[ArweaveTagNames.targetType];
         ret.alias = tx[ArweaveTagNames.alias];
+        ret.status = "Confirmed";
     }
     return ret;
 }

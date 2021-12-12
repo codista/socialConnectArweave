@@ -92,6 +92,9 @@ export async function isFollowing(source: string, target: string, namespace: str
         return false;
     }
     let expandedTxs = await expandTransactions(results, ar);
+    if (expandedTxs.length==0) {
+        return false
+    }
     let latest = getLatest(expandedTxs);
     let ctfollow: ConnType = "Follow";
     //console.log(`latest activity between source and target was ${latest[ArweaveTagNames.connType]}`);

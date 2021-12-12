@@ -14,6 +14,8 @@ import {useState,useEffect} from "react";
 import { Formik,Form,Field } from 'formik'; 
 import UserList from "./UserList"
 import {makeAPICall,APP_NAMESPACE,signMessage} from "./../lib/api"
+import {AddUserToList,updateUserStatus} from "./../lib/helpers"
+
 
 const UserActions = ({provider}) => {
 
@@ -37,6 +39,11 @@ const UserActions = ({provider}) => {
         if ('status' in ret && ret.status=="OK") {
            console.log("Unfollow succeeded");
            alert("Succesfuly unfollowed "+user.address+" (the UI will be updated soon when the transaction is fully mined)")
+
+           //update followings list state
+           let newFollowings=updateUserStatus(user.address,"Pending Upfollow",followings);
+            console.log('followings after update status: '+JSON.stringify(newFollowings));
+           setFollowings(newFollowings);
         }
         else {
             console.error("problem following"+JSON.stringify(ret));
@@ -65,6 +72,15 @@ const UserActions = ({provider}) => {
                                             });
         if ('status' in ret && ret.status=="OK") {
            console.log("follow succeeded");
+           console.log('followings before adding pending: '+JSON.stringify(followings));
+           
+           //update followings list state
+           let newFollowings=AddUserToList({address: values.address,
+            addressType: values.addressType,
+            alias: values.alias,
+            status: "Pending Follow"},followings);
+            console.log('followings after addind pending: '+JSON.stringify(newFollowings));
+           setFollowings(newFollowings);
         }
         else {
             console.error("problem following"+JSON.stringify(ret));
@@ -147,7 +163,7 @@ const UserActions = ({provider}) => {
                 justifyContent="center"
             >
             <Formik 
-                initialValues={{ address: "",addressType:"Eth"}}
+                initialValues={{ address: "",addressType:"Eth",alias:" "}}
                 onSubmit={(values, actions) => {
                 setTimeout(() => {
                     //alert(JSON.stringify(values, null, 2))

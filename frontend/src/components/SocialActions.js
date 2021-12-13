@@ -14,7 +14,7 @@ import {useState,useEffect} from "react";
 import { Formik,Form,Field } from 'formik'; 
 import UserList from "./UserList"
 import {makeAPICall,APP_NAMESPACE,signMessage} from "./../lib/api"
-import {AddUserToList,updateUserStatus} from "./../lib/helpers"
+import {AddUserToList,updateUserStatus,canFollow,canUnfollow} from "./../lib/helpers"
 
 
 const UserActions = ({provider}) => {
@@ -22,7 +22,10 @@ const UserActions = ({provider}) => {
     async function unfollowf(user)  {
         if (!provider) {
             console.error("submitting unfollow while not connected");
-            
+            return;
+        }
+        if (!canUnfollow(user.address,followings)) {
+            console.error('unfollow not permitted');
             return;
         }
 
@@ -38,7 +41,7 @@ const UserActions = ({provider}) => {
                                             });
         if ('status' in ret && ret.status=="OK") {
            console.log("Unfollow succeeded");
-           alert("Succesfuly unfollowed "+user.address+" (the UI will be updated soon when the transaction is fully mined)")
+           
 
            //update followings list state
            let newFollowings=updateUserStatus(user.address,"Pending Upfollow",followings);
@@ -58,6 +61,12 @@ const UserActions = ({provider}) => {
             return;
         }
 
+        if (!canFollow(values.address,followings)) {
+            console.error('follow not permitted');
+            actions.setSubmitting(false);
+            return;
+        }
+
         //sign message
         // eslint-disable-next-line
         let message = "Follow"+" "+values.address+" "+APP_NAMESPACE;
@@ -72,7 +81,7 @@ const UserActions = ({provider}) => {
                                             });
         if ('status' in ret && ret.status=="OK") {
            console.log("follow succeeded");
-           console.log('followings before adding pending: '+JSON.stringify(followings));
+           //console.log('followings before adding pending: '+JSON.stringify(followings));
            
            //update followings list state
            let newFollowings=AddUserToList({address: values.address,
@@ -94,7 +103,7 @@ const UserActions = ({provider}) => {
         if (!provider) return Array();
         let signerAddress = await provider.getSigner().getAddress(); 
         let ret=await makeAPICall("followings",{target:signerAddress,namespace:APP_NAMESPACE,targetType:"Eth"});
-        console.log("got followings is useractions "+JSON.stringify(ret));
+        //console.log("got followings is useractions "+JSON.stringify(ret));
         if ('status' in ret && ret.status=="OK" && 'users' in ret) {
             return ret.users;
         }

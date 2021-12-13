@@ -44,3 +44,5 @@ Start by cloning the code to your server
 - run npm install
 - rename src/lib/conf_private.js.sample to conf_private.js
 - change the API_URL_BASE to the host you're running the api server from (leave as is if on the same machine the frontend runs on)
+- run npm build
+- run npx serve -n -s build -l 80

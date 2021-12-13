@@ -6,12 +6,20 @@ import  { body,validationResult } from 'express-validator';
 
 const router = express.Router();
 
+const validateTargetType = (value) => {
+  if (value != "Eth" && value !== "Arweave") {
+    throw new Error('targetType should be either "Eth" or "Arweave"');
+  }
+  // Indicates the success of this synchronous custom validator
+  return true;
+};
+
 /**
-* @api {post} /api/v1/sc/follow Follow
+* @api {post} /api/v1/sc/follow 
 * @apiName follow address
 *
-* @apiParam  {String} [sourceAddress] source address (eth)
-* @apiParam  {String} [target] target address (eth or arweave)
+* @apiParam  {String} [sourceAddress] source (following) address (eth)
+* @apiParam  {String} [target] target (followed) address (eth or arweave)
 * @apiParam  {String} [namespace] app name
 * @apiParam  {String} [alias] target address alias (optional)
 * @apiParam  {String} [targetType] target address type: "Eth" or "Arweave"
@@ -24,13 +32,7 @@ router.post('/follow',
   body('target').isString(),
   body('namespace').isString(),
   body('alias').optional().isString(),
-  body('targetType').custom((value) => {
-    if (value != "Eth" && value !== "Arweave") {
-      throw new Error('targetType should be either "Eth" or "Arweave"');
-    }
-    // Indicates the success of this synchronous custom validator
-    return true;
-  }),
+  body('targetType').custom(validateTargetType),
   body('sig').isString(),
   async (req: express.Request, res: express.Response) => {
     //check for validation errors
@@ -71,13 +73,7 @@ router.post('/unfollow',
   body('sourceAddress').isEthereumAddress(),
   body('target').isString(),
   body('namespace').isString(),
-  body('targetType').custom((value) => {
-    if (value != "Eth" && value !== "Arweave") {
-      throw new Error('targetType should be either "Eth" or "Arweave"');
-    }
-    // Indicates the success of this synchronous custom validator
-    return true;
-  }),
+  body('targetType').custom(validateTargetType),
   body('sig').isString(),
   async (req: express.Request, res: express.Response) => {
     //check for validation errors
@@ -113,13 +109,7 @@ router.post('/unfollow',
 router.post('/followers',
   body('target').isString(),
   body('namespace').isString(),
-  body('targetType').custom((value) => {
-    if (value != "Eth" && value !== "Arweave") {
-      throw new Error('targetType should be either "Eth" or "Arweave"');
-    }
-    // Indicates the success of this synchronous custom validator
-    return true;
-  }),
+  body('targetType').custom(validateTargetType),
   async (req: express.Request, res: express.Response) => {
     //check for validation errors
     const errors = validationResult(req);

@@ -6,7 +6,7 @@ import {followingsReqData,followReqData,AddressType,followersReqdata,unfollowReq
 import {getFollowers,getFollowings,validateSignedMessage,expandTransactions,getLatest,submitAndWaitForConfirmation} from "./arweaveHelpers"
 dotenv.config();
 
-async function initArweave() {
+export async function initArweave() {
     let arweave: any,wallet: any,address: any,balance: any;
     try {
         arweave = Arweave.init({

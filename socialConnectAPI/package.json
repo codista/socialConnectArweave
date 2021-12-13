@@ -8,7 +8,7 @@
     "dev": "ts-node-dev src/index.ts",
     "lint": "eslint --fix src",
     "genkey": "tsc && node dist/scripts/generateWallet.js",
-    "test": "mocha -r ts-node/register test/**/*.spec.ts --timeout 200000"
+    "test": "mocha -r ts-node/register test/**/*.spec.ts --timeout 1500000"
   },
   "keywords": [],
   "author": "CJ R. <cj@null.computer> (https://w3cj.now.sh)",

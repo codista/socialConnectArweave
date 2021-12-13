@@ -7,35 +7,40 @@ import {ArweaveTagNames} from './../src/arweave/dataTypes'
 import dotenv from 'dotenv';
 dotenv.config();
 import {ethers} from 'ethers'
+import {waitForConfirmation} from './../src/arweave/arweaveHelpers'
 
 
 
 describe('Follow API', 
   () => { 
     let arweave: any;
-    let sourceaddr = "0xf8432C8a7F8d4D1ec8a5c1005E6AB67fE4c4bc20";
-    let targetaddr = "0x1e6527CB3132E792A067C6e1925692d35D3C1f32"; 
     let provider = new ethers.providers.AlchemyProvider("homestead", process.env.ALCEHMY_KEY);
     let wallet1 = new ethers.Wallet(process.env.ADDRESS_1 as string,provider);
     let wallet2 = new ethers.Wallet(process.env.ADDRESS_2 as string,provider);
     let wallet3 = new ethers.Wallet(process.env.ADDRESS_3 as string,provider);
     let wallet4 = new ethers.Wallet(process.env.ADDRESS_4 as string,provider);
-
+    let address1: string;
+    let address2: string;
+    let address3: string;
+    let address4: string;
 
     const namespace = Math.random().toString();  //make sure each test starts with a clean app with no previous follows/unfollows.
     console.log(`testing starting with namespace ${namespace}`);
-    before(()=>{
+    before(async ()=>{
         arweave = Arweave.init({
             host: 'arweave.net',
             port: 443,
             protocol: 'https'
         });
+        address1 = await wallet1.getAddress();
+        address2 = await wallet2.getAddress();
+        address3 = await wallet3.getAddress();
+        address4 = await wallet4.getAddress();
 
     }) ;
 
     it('should succeed to call api follow address', async () => { 
-        let address1 = await wallet1.getAddress();
-        let address2 = await wallet2.getAddress();
+        
         let sig = await wallet1.signMessage("Follow"+" "+address2+" "+namespace);
         let params = {
             sourceAddress: address1,
@@ -57,16 +62,17 @@ describe('Follow API',
         expect(statusCode).to.equal(200); 
         expect(data).to.be.an('object').that.has.property('tx_id');
         expect(data.tx_id).to.not.be.empty;
-        let firstTx = data.tx_id;
-        
+
+        let confirmed = await waitForConfirmation(data.tx_id,arweave);
+        expect(confirmed).to.equal(true);
     }); 
 
     
 
 
-    /*it('should retrieve followings', async () => { 
+    it('should retrieve followings', async () => { 
         let params = {
-            target: sourceaddr,
+            target: address1,
             namespace: namespace
         }
         const { statusCode, data, headers } = await curly.post('http://localhost:3000/api/v1/sc/followings', {
@@ -77,12 +83,16 @@ describe('Follow API',
             ],
         });
         console.log(`status code: ${statusCode} data: ${JSON.stringify(data)}`) ;
-        expect(statusCode).to.equal(200); 
+        expect(statusCode).to.equal(200);
+        expect(data).to.be.an('object').that.has.property('users');
+        expect(data.users).to.not.be.empty;
+        expect(data.users.length).equal(1);
+        expect(data.users[0].address).to.equal(address2);
     });
 
     it('should retrieve followers', async () => { 
         let params = {
-            target: targetaddr,
+            target: address2,
             namespace: namespace,  
             targetType: "Eth",
         }
@@ -94,29 +104,11 @@ describe('Follow API',
             ],
         });
         console.log(`status code: ${statusCode} data: ${JSON.stringify(data)}`) ;
-        expect(statusCode).to.equal(200); 
+        expect(statusCode).to.equal(200);
+        expect(data).to.be.an('object').that.has.property('users');
+        expect(data.users).to.not.be.empty;
+        expect(data.users.length).equal(1);
+        expect(data.users[0].address).to.equal(address1);
     });
-
-    
-
-    it('follow should fail if address not ethereum address', async () => { 
-        let params = {
-            sourceAddress: "aaaddd",
-            target: "0xf0Afc48C0cEc8Dae260C7597Aef0031A3A5CE8E3",
-            namespace: namespace,
-            alias: "David",
-            targetType: "Eth",
-            sig: "test"
-        }
-        const { statusCode, data, headers } = await curly.post('http://localhost:3000/api/v1/sc/follow', {
-            postFields: JSON.stringify(params),
-            httpHeader: [
-                'Content-Type: application/json',
-                'Accept: application/json'
-            ],
-        });
-        console.log(`status code: ${statusCode} data: ${JSON.stringify(data)}`) ;
-        expect(statusCode).to.not.equal(200);   
-    }); */
 
 });

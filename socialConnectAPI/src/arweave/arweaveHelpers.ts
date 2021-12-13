@@ -28,6 +28,33 @@ export async function expandTransactions(tx_ids: string[], ar: any): Promise<any
     return res;
 }
 
+export async function waitForConfirmation(txId: string, ar: any) {
+    let startTime: number=Date.now(),currTime: number=Date.now();
+    //wait up to 15 minutes for confirmation then bail.
+    let resp = await ar.transactions.getStatus(txId);
+    let curr10sec = 0;
+    while ('status' in resp && (resp.status==200 || resp.status==202 || resp.status==404) && resp.confirmed==null && (currTime-startTime)<1000*60*45) { 
+        try {
+            resp = await ar.transactions.getStatus(txId);
+            let tensec = Math.floor((currTime-startTime)/10000);
+            if (tensec>curr10sec) {
+                curr10sec=tensec;
+                console.log(`waiting for confirmation. response is ${JSON.stringify(resp)} time laspe: ${curr10sec*10} seconds`);
+            }
+            currTime=Date.now();
+        } catch(err) {
+            console.error("get status error "+err.message)
+        }
+    }
+    if (('status' in resp) && resp.status ==200 && ('confirmed' in resp) && resp.confirmed!=null && ('number_of_confirmations' in resp.confirmed) && resp.confirmed.number_of_confirmations>0) {
+        return true;
+    }
+    else {
+        console.error(`failed waiting for confirmed transaction. id: ${txId} response: ${JSON.stringify(resp)} time laspe: ${(currTime-startTime)/1000} seconds`);
+        return false;
+    }
+}
+
 export async function submitAndWaitForConfirmation(tx: any, ar: any,bWait: boolean) {
 
     let resp = await ar.transactions.post(tx);
@@ -39,21 +66,7 @@ export async function submitAndWaitForConfirmation(tx: any, ar: any,bWait: boole
         return true;
     }
 
-    let startTime: number=Date.now(),currTime: number=Date.now();
-    //wait up to 2 minutes for confirmation then bail.
-    resp = await ar.transactions.getStatus(tx.id);
-    while ('status' in resp && (resp.status==200 || resp.status==202) && resp.confirmed==null && (currTime-startTime)<1000*2720) {
-        resp = await ar.transactions.getStatus(tx.id);
-        console.log(`waiting for confirmation. response is ${JSON.stringify(resp)} time laspe: ${(currTime-startTime)/1000} seconds`);
-        currTime=Date.now();
-    }
-    if (('status' in resp) && resp.status ==200 && ('confirmed' in resp) && resp.confirmed!=null && ('number_of_confirmations' in resp.confirmed) && resp.confirmed.number_of_confirmations>0) {
-        return true;
-    }
-    else {
-        console.error(`failed waiting for confirmed transaction. id: ${tx.id} response: ${JSON.stringify(resp)} time laspe: ${(currTime-startTime)/1000} seconds`);
-        return false;
-    }
+    return await waitForConfirmation(tx.id,ar);
 }
 
 //returns the last transaction based on the createdBy tag

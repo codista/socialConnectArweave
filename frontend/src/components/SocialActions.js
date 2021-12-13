@@ -4,9 +4,11 @@ import {
     FormControl,
     FormLabel,
     Input,
+    Heading,
     FormHelperText,
     Button,
     VStack,
+    HStack,
     Select,
     FormErrorMessage,
     useColorModeValue} from "@chakra-ui/react"
@@ -44,7 +46,7 @@ const UserActions = ({provider}) => {
            
 
            //update followings list state
-           let newFollowings=updateUserStatus(user.address,"Pending Upfollow",followings);
+           let newFollowings=updateUserStatus(user.address,"Pending Unfollow",followings);
             console.log('followings after update status: '+JSON.stringify(newFollowings));
            setFollowings(newFollowings);
         }
@@ -137,8 +139,8 @@ const UserActions = ({provider}) => {
         let error
         if (!value) {
         error = "Contract address is required"
-        } else if (!/^0x[A-Fa-f0-9]+$/i.test(value)) {
-        error = "This needs to be a valid ethereum address"
+        } else if (!(/^0x[A-Fa-f0-9]+$/i.test(value) || /^[A-Za-z0-9_-]+$/i.test(value))) {
+        error = "This needs to be a valid ethereum/Arweave address"
         }
         return error
     }
@@ -151,14 +153,14 @@ const UserActions = ({provider}) => {
         return error
     }
 
-    let ctrlStle = {marginTop:'25px'};
+    let ctrlStle = {marginTop:'10px',marginLeft:'30px'};
     return (
         (provider!=null)?
         <VStack
-        p={5}
-        maxW={{ lg: "6xl" }}
-        alignItems="center"
-        justifyContent="center"
+            p={5}
+            maxW={{ lg: "6xl" }}
+            alignItems="center"
+            justifyContent="center"
         >
             <Box
                 bg={'white'}
@@ -171,87 +173,101 @@ const UserActions = ({provider}) => {
                 alignItems="center"
                 justifyContent="center"
             >
-            <Formik 
-                initialValues={{ address: "",addressType:"Eth",alias:" "}}
-                onSubmit={(values, actions) => {
-                setTimeout(() => {
-                    //alert(JSON.stringify(values, null, 2))
-                    onSubmitFollow(values, actions);
-                    
-                }, 1000)
-                }}
-            >
-                {(props) => (
-                    <Form >
-                        <Field name="address" validate={validateAddress}>
-                            {({ field, form }) => (
-                            <FormControl style={ctrlStle}  isRequired isInvalid={form.errors.address && form.touched.address} >
-                                <FormLabel htmlFor="address">Address to Follow</FormLabel>
-                                <Input {...field} id="address" placeholder="address" />
-                                <FormErrorMessage>{form.errors.address}</FormErrorMessage>
-                                <FormHelperText>Ethereum address for which to retrieve followers.</FormHelperText>
-                            </FormControl>
-                            )}
-                        </Field>
+                <VStack
+                    p={5}
+                    maxW={{ lg: "6xl" }}
+                    alignItems="center"
+                    justifyContent="center"
+                > 
+                    <Heading  size='2xl' isTruncated>Follow an Address</Heading>
+                    <Formik 
+                        initialValues={{ address: "",addressType:"Eth",alias:""}}
+                        onSubmit={(values, actions) => {
+                        setTimeout(() => {
+                            //alert(JSON.stringify(values, null, 2))
+                            onSubmitFollow(values, actions);
+                            
+                        }, 1000)
+                        }}
+                    >
+                        {(props) => (
+                            <Form >
+                                <HStack>
+                                <Field name="address" validate={validateAddress}>
+                                    {({ field, form }) => (
+                                    <FormControl style={ctrlStle}  isRequired isInvalid={form.errors.address && form.touched.address} >
+                                        <HStack>
+                                        <FormLabel htmlFor="address">Address to Follow</FormLabel>
+                                        <Input {...field} id="address" placeholder="address" />
+                                        </HStack>
+                                        <FormErrorMessage>{form.errors.address}</FormErrorMessage>
+                                        <FormHelperText>Ethereum/Arweave address to follow</FormHelperText>
+                                    </FormControl>
+                                    )}
+                                </Field>
 
-                        <Field name="addressType" >
-                            {({ field, form }) => (
-                            <FormControl style={ctrlStle}  isRequired isInvalid={form.errors.addressType && form.touched.addressType} >
-                                <FormLabel htmlFor="addressType">Type of Address</FormLabel>
-                                <Select {...field} id="addressType"  >
-                                     <option value='Eth'>Ethereum</option>
-                                     <option value='Arweave'>Arweave</option>
-                                </Select>
+                                <Field name="addressType" >
+                                    {({ field, form }) => (
+                                    <FormControl style={ctrlStle}  isRequired isInvalid={form.errors.addressType && form.touched.addressType} >
+                                        <HStack>
+                                        <FormLabel htmlFor="addressType">Type of Address</FormLabel>
+                                        <Select {...field} id="addressType"  maxWidth={120}>
+                                            <option value='Eth'>Ethereum</option>
+                                            <option value='Arweave'>Arweave</option>
+                                        </Select>
+                                        </HStack>
+                                        <FormHelperText>Type of Address to Follow (Ethereum or Arweave)</FormHelperText>
+                                    </FormControl>
+                                    )}
+                                </Field>
                                 
-                                <FormHelperText>Type of Address to Follow (Ethereum or Arweave)</FormHelperText>
-                            </FormControl>
-                            )}
-                        </Field>
-
-                        <Field name="alias" validate={validateAlias}>
-                            {({ field, form }) => (
-                            <FormControl style={ctrlStle}   isInvalid={form.errors.alias && form.touched.alias} >
-                                <FormLabel htmlFor="alias">Alias</FormLabel>
-                                <Input {...field} id="alias" placeholder="alias" />
-                                <FormErrorMessage>{form.errors.alias}</FormErrorMessage>
-                                <FormHelperText>Alias for Followed Address.</FormHelperText>
-                            </FormControl>
-                            )}
-                        </Field>
-
-                        <Box w={{ lg: "100%" }}
-                            m={5}
-                            alignItems="center"
-                            justifyContent="center"
-                        >        
-                            <Button type="submit"
-                                isLoading={props.isSubmitting}
-                                bg={'blue.400'}
-                                color={'white'}
-                                _hover={{
-                                bg: 'blue.500',
-                                }}>
-                                Follow
-                            </Button>
-                        </Box>  
-                    </Form>
-                )}
-            </Formik>
-            
-            
+                                <Field name="alias" validate={validateAlias}>
+                                    {({ field, form }) => (
+                                    <FormControl style={ctrlStle}   isInvalid={form.errors.alias && form.touched.alias} >
+                                        <HStack>
+                                        <FormLabel htmlFor="alias">Alias</FormLabel>
+                                        <Input {...field} id="alias" placeholder="alias" />
+                                        </HStack>
+                                        <FormErrorMessage>{form.errors.alias}</FormErrorMessage>
+                                        <FormHelperText>Alias for Followed Address.</FormHelperText>
+                                    </FormControl>
+                                    )}
+                                </Field>
+                                </HStack>
+                                <Box w={{ lg: "100%" }}
+                                    m={5}
+                                    alignItems="center"
+                                    justifyContent="center"
+                                >        
+                                    <Button type="submit"
+                                        isLoading={props.isSubmitting}
+                                        bg={'blue.400'}
+                                        color={'white'}
+                                        _hover={{
+                                        bg: 'blue.500',
+                                        }}>
+                                        Follow
+                                    </Button>
+                                </Box>  
+                            </Form>
+                        )}
+                    </Formik>
+                </VStack>
             </Box>
             <Box
                 bg={'white'}
                 mx={{ lg: 8 }}
                 display={{ lg: "flex" }}
                 w="full"
+                minWidth={1300}
                 shadow={{ lg: "lg" }}
                 rounded={{ lg: "lg" }}
                 alignItems="center"
                 justifyContent="center"
             >
-            <UserList users={followings} title="Your Follwings:" unfollow={true} unfollowFunc={unfollowf} /> 
+                <UserList users={followings} title="Your Follwings:" unfollow={true} unfollowFunc={unfollowf} /> 
             </Box>
+            
         </VStack> 
                             :<Text>Please connect to Metamask to manage your social connections.</Text>
     )

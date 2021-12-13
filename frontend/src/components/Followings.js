@@ -107,6 +107,7 @@ const Followings = () => {
             <Box
                 bg={useColorModeValue("white", "gray.800")}
                 mx={{ lg: 8 }}
+                minWidth={1300}
                 display={{ lg: "flex" }}
                 w="full"
                 shadow={{ lg: "lg" }}

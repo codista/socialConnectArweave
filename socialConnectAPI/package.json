@@ -4,7 +4,7 @@
   "description": " A basic starter for an express.js API",
   "main": "index.js",
   "scripts": {
-    "start": "tsc && node dist/index.js",
+    "start": "tsc && node dist/src/index.js",
     "dev": "ts-node-dev src/index.ts",
     "lint": "eslint --fix src",
     "genkey": "tsc && node dist/scripts/generateWallet.js",

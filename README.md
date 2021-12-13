@@ -31,18 +31,18 @@ Start by cloning the code to your server
 
 ### Api server
 - cd to SocialConnectAPI
-- run npm install
-- change .env.sample to .env
-- fill in the details of your arweave address (with sufficient AR to submit transaction on behalf of the app users), ALCHEMY user key and 4 eth private keys for testing purposes (make sure to set secure permissions to the file)
+- Run npm install
+- Change .env.sample to .env
+- Fill in the details of your arweave address (with sufficient AR to submit transaction on behalf of the app users), ALCHEMY user key and 4 eth private keys for testing purposes (make sure to set secure permissions to the file)
 - Run npm start to start the server (npm run dev for dev mode)
 - (For production deployment you need to expose the API on a public URL, for testing purposes the API can live on the same machine where the frontend is run and be accessed through localhost:3000)
-- for testing: npm run test
+- For testing: npm run test
 
 
 ### Frontend
 - cd to frontend
-- run npm install
+- Run npm install
 - rename src/lib/conf_private.js.sample to conf_private.js
-- change the API_URL_BASE to the host you're running the api server from (leave as is if on the same machine the frontend runs on)
-- run npm build
-- run npx serve -n -s build -l 80
+- In conf_private.js, change the API_URL_BASE to the host you're running the api server from (leave as is if on the same machine the frontend runs on)
+- Run npm build
+- Run npx serve -n -s build -l 80

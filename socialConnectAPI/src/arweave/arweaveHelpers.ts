@@ -64,7 +64,9 @@ export async function submitAndWaitForConfirmation(tx: any, ar: any,bWait: boole
         console.error(`submit trasaction failed returned status ${resp.status}`)
     }
     if (testar) {
+        console.log('before mine');
         await testar.mine();
+        console.log('after mine');
     }
     if (!bWait) {
         return true;

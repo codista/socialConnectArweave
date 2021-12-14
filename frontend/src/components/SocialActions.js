@@ -43,8 +43,7 @@ const UserActions = ({provider}) => {
                                             });
         if ('status' in ret && ret.status=="OK") {
            console.log("Unfollow succeeded");
-           
-
+        
            //update followings list state
            let newFollowings=updateUserStatus(user.address,"Pending Unfollow",followings);
             console.log('followings after update status: '+JSON.stringify(newFollowings));

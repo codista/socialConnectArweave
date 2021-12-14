@@ -47,6 +47,7 @@ export async function waitForConfirmation(txId: string, ar: any) {
         }
     }
     if (('status' in resp) && resp.status ==200 && ('confirmed' in resp) && resp.confirmed!=null && ('number_of_confirmations' in resp.confirmed) && resp.confirmed.number_of_confirmations>0) {
+        console.log(`success waiting for confirmed transaction. id: ${txId} response: ${JSON.stringify(resp)} time laspe: ${(currTime-startTime)/1000} seconds`)
         return true;
     }
     else {
@@ -55,12 +56,15 @@ export async function waitForConfirmation(txId: string, ar: any) {
     }
 }
 
-export async function submitAndWaitForConfirmation(tx: any, ar: any,bWait: boolean) {
+export async function submitAndWaitForConfirmation(tx: any, ar: any,bWait: boolean,testar: any) {
 
     let resp = await ar.transactions.post(tx);
     console.log(`submitted. response is ${JSON.stringify(resp)} `);
     if (resp.status!=200) {
         console.error(`submit trasaction failed returned status ${resp.status}`)
+    }
+    if (testar) {
+        await testar.mine();
     }
     if (!bWait) {
         return true;
@@ -75,12 +79,13 @@ export function getLatest(txs: any) {
     return txs[txs.length-1];
 }
 
-export async function getFollowings(address: string, namespace: string, ar: any) {
+export async function getFollowings(address: string, namespace: string, ar: any,walletAddress: string) {
     //get all follow transactions whos source is this address.
-    const myQuery =and(equals('from', process.env.ARWEAVE_ADDRESS),
+    const myQuery =and(equals('from', walletAddress),
             equals(ArweaveTagNames.source,address),
             equals(ArweaveTagNames.nameSpace,namespace),
     );
+    console.log(`query is ${JSON.stringify(myQuery)}`)
     const results = await ar.arql(myQuery);
 
     let expandedTxs = await expandTransactions(results, ar);
@@ -92,13 +97,14 @@ export async function getFollowings(address: string, namespace: string, ar: any)
 
 
 
-export async function getFollowers(address: string, addressType: string,namespace: string, ar: any) {
+export async function getFollowers(address: string, addressType: string,namespace: string, ar: any,walletAddress: string) {
     //get all follow transactions whos target is this address.
-    const myQuery =and(equals('from', process.env.ARWEAVE_ADDRESS),
+    const myQuery =and(equals('from', walletAddress),
             equals(ArweaveTagNames.connTarget,address),
             equals(ArweaveTagNames.targetType,addressType),
             equals(ArweaveTagNames.nameSpace,namespace),
     );
+    console.log(`query is ${JSON.stringify(myQuery)}`)
     const results = await ar.arql(myQuery);
 
     let expandedTxs = await expandTransactions(results, ar);

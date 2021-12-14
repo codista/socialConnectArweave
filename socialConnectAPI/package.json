@@ -26,7 +26,8 @@
     "express": "^4.17.1",
     "express-validator": "^6.13.0",
     "helmet": "^4.6.0",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "testweave-sdk": "^0.2.2"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",

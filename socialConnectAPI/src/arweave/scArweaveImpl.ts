@@ -4,18 +4,33 @@ import { and, or, equals } from 'arql-ops';
 import dotenv from 'dotenv';
 import {followingsReqData,followReqData,AddressType,followersReqdata,unfollowReqData,ArweaveTagNames,ConnType} from "./dataTypes"
 import {getFollowers,getFollowings,validateSignedMessage,expandTransactions,getLatest,submitAndWaitForConfirmation} from "./arweaveHelpers"
+import TestWeave from 'testweave-sdk';
 dotenv.config();
 
 export async function initArweave() {
-    let arweave: any,wallet: any,address: any,balance: any;
+    let arweave: any,testweave:any,wallet: any,address: any,balance: any;
     try {
-        arweave = Arweave.init({
-            host: 'arweave.net',
-            port: 443,
-            protocol: 'https'
-        });
+        if (process.env.MODE=="production") {
+            arweave = Arweave.init({
+                host: 'arweave.net',
+                port: 443,
+                protocol: 'https'
+            });
+        }
+        else {
+            arweave = Arweave.init({
+                host: 'localhost',
+                port: 1984,
+                protocol: 'http',
+                timeout: 20000,
+                logging: false,
+            });
+            testweave = await TestWeave.init(arweave);
+        }
+        
 
-        wallet = JSON.parse(process.env.ARWEAVE_KEY);
+        //  wallet = JSON.parse(process.env.ARWEAVE_KEY);
+        wallet = testweave.rootJWK;
         address = await arweave.wallets.jwkToAddress(wallet);
         balance = await arweave.wallets.getBalance(address);
         console.log(`Arweave initialized. wallet address: ${address}. address balance: ${balance}`);
@@ -24,7 +39,7 @@ export async function initArweave() {
         console.error("exception in initArweave",error.message);
         return false;
     }
-    return {wallet: wallet, address: address, arweave: arweave};
+    return {wallet: wallet, address: address, arweave: arweave,testweave: testweave};
 }
   
 
@@ -35,7 +50,7 @@ export async function follow(data: followReqData): Promise<boolean | string> {
     
     let ar =  await initArweave();
     if (typeof ar == "boolean" && ar==false) {return false;}  
-    const {wallet, address,arweave} = ar;
+    const {wallet, address,arweave,testweave} = ar;
 
     //validate request signature
     let ct: ConnType="Follow";
@@ -49,7 +64,7 @@ export async function follow(data: followReqData): Promise<boolean | string> {
         console.log("signature validated");
     }
 
-    let alreadyFollowing = await isFollowing(data.sourceAddress, data.target,data.namespace,arweave);
+    let alreadyFollowing = await isFollowing(data.sourceAddress, data.target,data.namespace,arweave,address);
     if (typeof alreadyFollowing=="string") {
         console.log('already following, returning existing transaction id '+alreadyFollowing);
         return alreadyFollowing;         //success with last follow tx id since we don't need to re-follow
@@ -70,7 +85,7 @@ export async function follow(data: followReqData): Promise<boolean | string> {
         transaction.addTag(ArweaveTagNames.createdDate, Date.now());
         transaction.addTag(ArweaveTagNames.source, data.sourceAddress);
         await arweave.transactions.sign(transaction, wallet);
-        let ret = await submitAndWaitForConfirmation(transaction,arweave,false);
+        let ret = await submitAndWaitForConfirmation(transaction,arweave,false,testweave);
         if (!ret) {return false;}
     } catch(err) {
         console.error("exception in follow: ", err.message);
@@ -80,8 +95,8 @@ export async function follow(data: followReqData): Promise<boolean | string> {
 }
 
 //return a string with the latest follow transaction id if following, false if not following
-export async function isFollowing(source: string, target: string, namespace: string,ar: any) {
-    const myQuery =and(equals('from', process.env.ARWEAVE_ADDRESS),
+export async function isFollowing(source: string, target: string, namespace: string,ar: any, walletAddress: string) {
+    const myQuery =and(equals('from', walletAddress),
             equals(ArweaveTagNames.source,source),
             equals(ArweaveTagNames.connTarget,target),
             equals(ArweaveTagNames.nameSpace,namespace),
@@ -104,7 +119,7 @@ export async function isFollowing(source: string, target: string, namespace: str
 export async function unfollow(data: unfollowReqData): Promise<boolean|string> {
     let ar =  await initArweave();
     if (typeof ar == "boolean" && ar==false) {return false;}  
-    const {wallet, address,arweave} = ar;
+    const {wallet, address,arweave,testweave} = ar;
 
     //validate request signature
     let ct: ConnType="Unfollow";
@@ -116,7 +131,7 @@ export async function unfollow(data: unfollowReqData): Promise<boolean|string> {
     }
 
     //only unfollow if currently following
-    let isfollowing = await isFollowing(data.sourceAddress, data.target,data.namespace,arweave);
+    let isfollowing = await isFollowing(data.sourceAddress, data.target,data.namespace,arweave,address);
     if (typeof isfollowing=="boolean" && isfollowing===false) {
         return "not following";         //success with dummy tx id since we don't need to unfollow if not following
     }
@@ -134,7 +149,7 @@ export async function unfollow(data: unfollowReqData): Promise<boolean|string> {
         transaction.addTag(ArweaveTagNames.source, data.sourceAddress);
         await arweave.transactions.sign(transaction, wallet);
 
-        let ret = await submitAndWaitForConfirmation(transaction,arweave,false);
+        let ret = await submitAndWaitForConfirmation(transaction,arweave,false,testweave);
         if (!ret) {return false;}
     } catch(err) {
         console.error("exception in follow: ", err.message);
@@ -150,7 +165,7 @@ export async function followers(data: followersReqdata): Promise<object | boolea
     const {wallet, address,arweave} = ar;
 
     
-    let followers= await getFollowers(data.target,data.targetType, data.namespace,arweave);
+    let followers= await getFollowers(data.target,data.targetType, data.namespace,arweave,address);
     console.log("followers is "+JSON.stringify(followers));
     return followers;
 } 
@@ -161,7 +176,7 @@ export async function followings(data: followingsReqData): Promise<object | bool
     const {wallet, address,arweave} = ar;
 
     
-    let followings= await getFollowings(data.target, data.namespace,arweave);
+    let followings= await getFollowings(data.target, data.namespace,arweave,address);
     //console.log("followings is "+JSON.stringify(followings));
     return followings;
 } 

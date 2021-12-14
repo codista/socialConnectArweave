@@ -8,12 +8,13 @@ import dotenv from 'dotenv';
 dotenv.config();
 import {ethers} from 'ethers'
 import {waitForConfirmation} from './../src/arweave/arweaveHelpers'
+import TestWeave from 'testweave-sdk';
 
 
 
 describe('Follow API', 
   () => { 
-    let arweave: any;
+    let arweave: any,testweave:any;
     let provider = new ethers.providers.AlchemyProvider("homestead", process.env.ALCEHMY_KEY);
     let wallet1 = new ethers.Wallet(process.env.ADDRESS_1 as string,provider);
     let wallet2 = new ethers.Wallet(process.env.ADDRESS_2 as string,provider);
@@ -28,10 +29,15 @@ describe('Follow API',
     console.log(`testing starting with namespace ${namespace}`);
     before(async ()=>{
         arweave = Arweave.init({
-            host: 'arweave.net',
-            port: 443,
-            protocol: 'https'
-        });
+            host: 'localhost',
+            port: 1984,
+            protocol: 'http',
+            timeout: 20000,
+            logging: false,
+          }); 
+          
+          testweave = await TestWeave.init(arweave);
+
         address1 = await wallet1.getAddress();
         address2 = await wallet2.getAddress();
         address3 = await wallet3.getAddress();
@@ -51,7 +57,7 @@ describe('Follow API',
             sig: sig
         }
         
-        const { statusCode, data } = await curly.post('http://localhost:3000/api/v1/sc/follow', {
+        const { statusCode, data } = await curly.post('http://localhost:3001/api/v1/sc/follow', {
             postFields: JSON.stringify(params),
             httpHeader: [
                 'Content-Type: application/json',
@@ -75,7 +81,7 @@ describe('Follow API',
             target: address1,
             namespace: namespace
         }
-        const { statusCode, data, headers } = await curly.post('http://localhost:3000/api/v1/sc/followings', {
+        const { statusCode, data, headers } = await curly.post('http://localhost:3001/api/v1/sc/followings', {
             postFields: JSON.stringify(params),
             httpHeader: [
                 'Content-Type: application/json',
@@ -96,7 +102,7 @@ describe('Follow API',
             namespace: namespace,  
             targetType: "Eth",
         }
-        const { statusCode, data, headers } = await curly.post('http://localhost:3000/api/v1/sc/followers', {
+        const { statusCode, data, headers } = await curly.post('http://localhost:3001/api/v1/sc/followers', {
             postFields: JSON.stringify(params),
             httpHeader: [
                 'Content-Type: application/json',

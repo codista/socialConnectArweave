@@ -15,7 +15,7 @@ import {makeAPICall,APP_NAMESPACE} from "./../lib/api"
 
 const Followers = () => {
     const  onSubmit = async (values,actions) => {
-        //AddAppraisalFunc(values);
+        
         let ret=await makeAPICall("followers",{target:values.address,namespace:APP_NAMESPACE,targetType:"Eth"});
         //console.log("got followers "+JSON.stringify(ret));
         if ('status' in ret && ret.status=="OK" && 'users' in ret) {

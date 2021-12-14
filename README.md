@@ -25,7 +25,7 @@ A user of the frontend app does not need an aweave wallet. They only need to con
 ## Challanges
 The main challanges for a production ready app are the spead and confirmaion times of the arweave network. For the purpose of this project we used the arweave SDK/API endpoint. It is possible that when using a local node, speed and performance can be improved.
 
-## Running the app
+## Usage Instructions
 
 Start by cloning the code to your server
 
@@ -33,10 +33,14 @@ Start by cloning the code to your server
 - cd to SocialConnectAPI
 - Run npm install
 - Change .env.sample to .env
-- Fill in the details of your arweave address (with sufficient AR to submit transaction on behalf of the app users), ALCHEMY user key and 4 eth private keys for testing purposes (make sure to set secure permissions to the file)
-- Run npm start to start the server (npm run dev for dev mode)
+- the server can run with either the arweave production or with a local testweave instance (this is defined in the .env file as MODE demo or production). If you're using demo mode, running testweave is needed (see next item), for production mode a funded arweave address is needed.
+- clone and run testweave-docker according to the instruction here: https://github.com/ArweaveTeam/testweave-docker.git (note that testweave-docker occupies ports 80 and 3000 so these will need to be available on the server that runs the api)
+- In the .env file, fill in the details of your arweave address (with sufficient AR to submit transaction on behalf of the app users) if running in production
+- In the .env file, fill in ALCHEMY user key
+- In the .env file, fill 4 eth private keys for testing purposes (make sure to set secure permissions to the .env file)
+- Run npm start to start the api server (npm run dev for dev mode)
 - (For production deployment you need to expose the API on a public URL, for testing purposes the API can live on the same machine where the frontend is run and be accessed through localhost:3000)
-- For testing: npm run test
+- For testing: npm run test (requires a local testweave-docker instance running)
 
 
 ### Frontend
@@ -45,4 +49,4 @@ Start by cloning the code to your server
 - rename src/lib/conf_private.js.sample to conf_private.js
 - In conf_private.js, change the API_URL_BASE to the host you're running the api server from (leave as is if on the same machine the frontend runs on)
 - Run npm build
-- Run npx serve -n -s build -l 80
+- Run npx serve -n -s build -l 80 to serve the app from port 80 (make sure to clear permissions to use port 80 and make sure it is not already used).

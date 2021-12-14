@@ -66,7 +66,8 @@ export async function submitAndWaitForConfirmation(tx: any, ar: any,bWait: boole
     }
     if (testar) {
         console.log('before mine');
-        await testar.mine();
+        //await testar.mine();
+        testar.mine();
         console.log('after mine');
     }
     if (!bWait) {

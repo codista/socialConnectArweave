@@ -56,6 +56,7 @@ export async function waitForConfirmation(txId: string, ar: any) {
     }
 }
 
+
 export async function submitAndWaitForConfirmation(tx: any, ar: any,bWait: boolean,testar: any) {
 
     let resp = await ar.transactions.post(tx);

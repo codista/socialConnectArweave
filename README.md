@@ -22,8 +22,10 @@ The solution is based on two components:
 
 A user of the frontend app does not need an aweave wallet. They only need to connect with metamask to sign messages (prooving they are the owners of the ethereum addresses doing the following/unfollowing). The frontend connects to the api server that submits the transactions to the arweave network (after validating the signature). The arweave address on the API server that submits the transactions needs to be loaded with funds to support the transactions.
 
+The lists of current followings/followers are retrieved using arql queries. The API sorts by date all follow/unfollow transactions of a user for a particular target address, and if the latest transaction is Follow, the user is considered to be following the target address. if the last transaction is Unfollow (or no transactions exist) the user is considered to not follow the target address
+
 ## Challanges
-The main challanges for a production ready app are the spead and confirmaion times of the arweave network. For the purpose of this project we used the arweave SDK/API endpoint. It is possible that when using a local node, speed and performance can be improved.
+When working in production (using the arweave public endpoint) confirmation times can be slow (this is not an issue when working with a local node using the testweave-docker).
 
 ## Usage Instructions
 
@@ -38,6 +40,7 @@ Start by cloning the code to your server
 - In the .env file, fill in the details of your arweave address (with sufficient AR to submit transaction on behalf of the app users) if running in production
 - In the .env file, fill in ALCHEMY user key
 - In the .env file, fill 4 eth private keys for testing purposes (make sure to set secure permissions to the .env file)
+- note that on the .env file the api server is set to use port 3001, this is because testweave ocupies port 3000
 - Run npm start to start the api server (npm run dev for dev mode)
 - (For production deployment you need to expose the API on a public URL, for testing purposes the API can live on the same machine where the frontend is run and be accessed through localhost:3000)
 - For testing: npm run test (requires a local testweave-docker instance running)

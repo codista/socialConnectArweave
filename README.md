@@ -56,4 +56,4 @@ Start by cloning the code to your server
 
 
 ## Live Demo
-The dApp has been deployed to arweave and is accesible here: https://tvk55vhuashroyzyhtrmp756bxvwjuynypwvc4ghmu4uc6lnfn6q.arweave.net/nVXe1PQEjxdjODzix_--Detk0w3D7VFwx2U5QXltK30/
+The dApp has been deployed to arweave and is accesible here: https://arweave.net/naVmMzbYjMT0vgXv1pOiIZD-noR-GH6POyarbtpklMA

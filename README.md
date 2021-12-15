@@ -24,6 +24,9 @@ A user of the frontend app does not need an aweave wallet. They only need to con
 
 The lists of current followings/followers are retrieved using arql queries. The API sorts by date all follow/unfollow transactions of a user for a particular target address, and if the latest transaction is Follow, the user is considered to be following the target address. if the last transaction is Unfollow (or no transactions exist) the user is considered to not follow the target address
 
+## addresses and validation
+At this stage the app supports the following address to be an ethereum address and the followed address to be either an ethereum or an arweave address. Validation of actions is done using a signature using the private key of the address doing the following/unfollowing. The signature message includes the action and the target address, and is stored onchain in arweave with the transaction so that it can be validated by any using app.
+
 ## Pholisiphy behind the architecture
 A key design principle behind our architecture is enabling users to use this app without having to install an arweave wallet or own any AR. Burdening the end users with these prerequisites would have been prohibitive to user adoption and is conceptually wrong since arweave should be thought of as underlying infrastructure in this case, transparent to the end user. This is inline with other apps relying on arweave such as mirror.xyz. 
 

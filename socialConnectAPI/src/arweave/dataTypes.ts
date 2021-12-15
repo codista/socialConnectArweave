@@ -22,7 +22,8 @@ export const ArweaveTagNames =
     nameSpace:  "NameSpace",
     targetType: "targetType",
     createdDate:"Created At",
-    source:     "Source Address"
+    source:     "Source Address",
+    signature:   "signature"
 };
 
 

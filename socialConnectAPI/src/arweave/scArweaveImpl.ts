@@ -84,6 +84,8 @@ export async function follow(data: followReqData): Promise<boolean | string> {
         transaction.addTag(ArweaveTagNames.alias, data.alias);
         transaction.addTag(ArweaveTagNames.createdDate, Date.now());
         transaction.addTag(ArweaveTagNames.source, data.sourceAddress);
+        transaction.addTag(ArweaveTagNames.signature, data.sig);
+        
         await arweave.transactions.sign(transaction, wallet);
         let ret = await submitAndWaitForConfirmation(transaction,arweave,false,testweave);
         if (!ret) {return false;}
@@ -147,6 +149,7 @@ export async function unfollow(data: unfollowReqData): Promise<boolean|string> {
         transaction.addTag(ArweaveTagNames.targetType, data.targetType);
         transaction.addTag(ArweaveTagNames.createdDate, Date.now());
         transaction.addTag(ArweaveTagNames.source, data.sourceAddress);
+        transaction.addTag(ArweaveTagNames.signature, data.sig);
         await arweave.transactions.sign(transaction, wallet);
 
         let ret = await submitAndWaitForConfirmation(transaction,arweave,false,testweave);

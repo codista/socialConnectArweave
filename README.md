@@ -24,10 +24,13 @@ A user of the frontend app does not need an aweave wallet. They only need to con
 
 The lists of current followings/followers are retrieved using arql queries. The API sorts by date all follow/unfollow transactions of a user for a particular target address, and if the latest transaction is Follow, the user is considered to be following the target address. if the last transaction is Unfollow (or no transactions exist) the user is considered to not follow the target address
 
-## Challanges
-When working in production (using the arweave public endpoint) confirmation times can be slow (this is not an issue when working with a local node using the testweave-docker).
+## Pholisiphy behind the architecture
+A key design principle behind our architecture is enabling users to use this app without having to install an arweave wallet or own any AR. Burdening the end users with these prerequisites would have been prohibitive to user adoption and is conceptually wrong since arweave should be thought of as underlying infrastructure in this case, transparent to the end user. This is inline with other apps relying on arweave such as mirror.xyz. 
 
-## Usage Instructions
+For this reason the service relies on a publicly hosted api server that handles the arweave interactions in the backend. The raw connection data however, is stored solely on arweave and can be used at any point by any third party application or alternative UIs.
+
+
+## Installation and Usage Instructions
 
 Start by cloning the code to your server
 
@@ -54,6 +57,46 @@ Start by cloning the code to your server
 - Run npm build
 - Run npx serve -n -s build -l 80 to serve the app from port 80 (make sure to clear permissions to use port 80 and make sure it is not already used).
 
+## API reference
+```
+@api {post} /api/v1/sc/follow 
+* @apiName follow address
+*
+* @apiParam  {String} [sourceAddress] source (following) address (eth)
+* @apiParam  {String} [target] target (followed) address (eth or arweave)
+* @apiParam  {String} [namespace] app name
+* @apiParam  {String} [alias] target address alias (optional)
+* @apiParam  {String} [targetType] target address type: "Eth" or "Arweave"
+* @apiParam  {String} [sig] source address signature
+```
+
+```
+@api {post} /api/v1/sc/unfollow Unfollow
+* @apiName unfollow address
+*
+* @apiParam  {String} [sourceAddress] source address (eth)
+* @apiParam  {String} [target] target address (eth or arweave)
+* @apiParam  {String} [namespace] app name
+* @apiParam  {String} [targetType] target address type: "Eth" or "Arweave"
+* @apiParam  {String} [sig] source address signature
+```
+
+```
+* @api {post} /api/v1/sc/followers 
+* @apiName Followers
+*
+* @apiParam  {String} [target] target address (eth or arweave)
+* @apiParam  {String} [targetType] target address type: "Eth" or "Arweave"
+* @apiParam  {String} [namespace] app name
+```
+
+```
+* @api {post} /api/v1/sc/followings 
+* @apiName followings
+*
+* @apiParam  {String} [target] target address (eth or arweave)
+* @apiParam  {String} [namespace] app name
+```
 
 ## Live Demo
 The dApp has been deployed to arweave and is accesible here: https://arweave.net/naVmMzbYjMT0vgXv1pOiIZD-noR-GH6POyarbtpklMA

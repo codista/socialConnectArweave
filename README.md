@@ -53,3 +53,7 @@ Start by cloning the code to your server
 - In conf_private.js, change the API_URL_BASE to the host you're running the api server from (leave as is if on the same machine the frontend runs on)
 - Run npm build
 - Run npx serve -n -s build -l 80 to serve the app from port 80 (make sure to clear permissions to use port 80 and make sure it is not already used).
+
+
+## Live Demo
+The app demp has been deployed to arweave and is accesible here: https://tvk55vhuashroyzyhtrmp756bxvwjuynypwvc4ghmu4uc6lnfn6q.arweave.net/nVXe1PQEjxdjODzix_--Detk0w3D7VFwx2U5QXltK30/

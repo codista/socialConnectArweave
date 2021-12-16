@@ -105,4 +105,4 @@ Start by cloning the code to your server
 The dApp has been deployed to arweave and is accesible here: https://arweave.net/naVmMzbYjMT0vgXv1pOiIZD-noR-GH6POyarbtpklMA
 
 ## Demo video
-https://vimeo.com/manage/videos/656963777
+https://vimeo.com/656963777

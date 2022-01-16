@@ -101,8 +101,4 @@ Start by cloning the code to your server
 * @apiParam  {String} [namespace] app name
 ```
 
-## Live Demo
-The dApp has been deployed to arweave and is accesible here: https://arweave.net/naVmMzbYjMT0vgXv1pOiIZD-noR-GH6POyarbtpklMA
 
-## Demo video
-https://vimeo.com/656963777
